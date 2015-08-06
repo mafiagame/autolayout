@@ -22,6 +22,7 @@ end
 
 function AutoLayout:clear()
 	self.box:clear()
+	self.text = nil
 end
 
 function AutoLayout:count()
@@ -97,6 +98,54 @@ function AutoLayout:refreshSizeSuit()
 	end	
 end
 
+function AutoLayout:disableLoadMore()
+	self.isEnableLoadMore = false
+	self.loadMoreCallfunc = nil
+	if self.text then
+		self.text:setVisible(false)
+	end
+end
+
+function AutoLayout:enableLoadMore(_callfunc)
+	self.isEnableLoadMore = true
+	self.loadMoreCallfunc = _callfunc
+	if self.text then
+		self.text:setVisible(true)
+	end
+end
+
+function AutoLayout:onTouch_(event)
+	if self.isEnableLoadMore then
+		if "began" == event.name then
+			print("onTouch_:",self.box:getPositionY())
+			self.start_calc = self.box:getPositionY() >= 0
+			self.text:setVisible(self.start_calc)
+		end
+		if self.start_calc then
+			if "moved" == event.name then
+				local posy = self.box:getPositionY()
+				local load = posy > 200
+				if self.load ~= load then
+					if load then
+						self.text:setString("松手加载更多")
+					else
+						self.text:setString("上拉加载")
+					end
+					self.load = load
+				end
+			elseif "ended" == event.name then
+				print("AutoLayout:",self.load)
+				self.load = self.box:getPositionY() > 200
+				if self.load then
+					self.loadMoreCallfunc()
+				end
+			end
+		end
+	end
+
+	return AutoLayout.super.onTouch_(self, event)
+end
+
 function AutoLayout:layout(_movetoend, _ani)
 	-- 计算偏移,重新布局
 	local length = 0
@@ -126,6 +175,20 @@ function AutoLayout:layout(_movetoend, _ani)
 			else
 				self:setContentOffset(-(self.box:getContentSize().width-length)+offset, _ani)
 			end	
+		end
+	end
+
+	if not self.text then
+	    self.text = cc.ui.UILabel.new({text = "", size = 99, color = display.COLOR_WHITE})
+		    :addTo(self.box,99999)
+		    :align(display.CENTER_TOP)
+	end
+	self.text:pos(self.box:getContentSize().width/2, -100)
+	if self.isEnableLoadMore then
+		if self:getDirection() == cc.SCROLLVIEW_DIRECTION_VERTICAL then
+			self.text:setVisible(self.box:getContentSize().height>self:getViewSize().height)
+		else
+			self.text:setVisible(self.box:getContentSize().width>self:getViewSize().width)
 		end
 	end
 
