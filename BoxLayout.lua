@@ -113,15 +113,22 @@ function BoxLayout:getItem(_id)
 	return assert(self.item[_id])
 end
 
+function BoxLayout:getItemSize(_item)
+	local box = _item:getBoundingBox()
+	return cc.size(box.width, box.height)
+end
+
 function BoxLayout:measure(_direction, _padding)
 	local w,h = 0,0
+	local size = nil
 	for i,v in ipairs(self.item) do
+		size = self:getItemSize(v.item)
 		if _direction == cc.ui.UIScrollView.DIRECTION_VERTICAL then
-			w = math.max(w, v.item:getContentSize().width+v.params.l+v.params.r) 
-			h = h + v.item:getContentSize().height+v.params.t+v.params.b
+			w = math.max(w, size.width+v.params.l+v.params.r) 
+			h = h + size.height+v.params.t+v.params.b
 		elseif _direction == cc.ui.UIScrollView.DIRECTION_HORIZONTAL then
-			h = math.max(h, v.item:getContentSize().height+v.params.t+v.params.b) 
-			w = w + v.item:getContentSize().width+v.params.l+v.params.r
+			h = math.max(h, size.height+v.params.t+v.params.b) 
+			w = w + size.width+v.params.l+v.params.r
 		end
 	end
 	if _direction == cc.ui.UIScrollView.DIRECTION_VERTICAL then
@@ -170,7 +177,7 @@ function BoxLayout:hlayout(_params, _w, _anchor)
 	local y = 0
 	local size = nil
 	for i,v in ipairs(self.item) do
-		size = v.item:getContentSize()
+		size = self:getItemSize(v.item)
 		y = _anchor.y * _params.h + (1 - v.item:getAnchorPoint().y - _anchor.y) * size.height
 		x = x + v.params.l + size.width/2
 		v.item:setPosition(x,y)
@@ -183,7 +190,7 @@ function BoxLayout:vlayout(_params, _h, _anchor)
 	local y = _h - (_anchor.y * (_params.h - _h))
 	local size = nil
 	for i,v in ipairs(self.item) do
-		size = v.item:getContentSize()
+		size = self:getItemSize(v.item)
 		x = _anchor.x * _params.w + (1 - v.item:getAnchorPoint().x - _anchor.x) * size.width
 		y = y - (v.params.t + size.height/2)
 		v.item:setPosition(x,y)
