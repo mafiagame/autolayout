@@ -78,9 +78,9 @@ end
 function BoxLayout:pushGrid(_item_list, _stripe, _direction, _params, _padding)
 	_params = _params or {}
 	
-	if _direction == cc.SCROLLVIEW_DIRECTION_HORIZONTAL then
+	if _direction == cc.ui.UIScrollView.DIRECTION_HORIZONTAL then
 		_params.align = _params.align or display.LEFT_CENTER
-	elseif _direction == cc.SCROLLVIEW_DIRECTION_VERTICAL and not _params.h then
+	elseif _direction == cc.ui.UIScrollView.DIRECTION_VERTICAL and not _params.h then
 		_params.align = _params.align or display.CENTER_TOP
 	end
 	
@@ -93,9 +93,9 @@ function BoxLayout:pushGrid(_item_list, _stripe, _direction, _params, _padding)
 		end
 		box:push(v, _padding)
 		if i%_stripe == 0 or i == len then
-			if _direction == cc.SCROLLVIEW_DIRECTION_HORIZONTAL and not _params.w then
+			if _direction == cc.ui.UIScrollView.DIRECTION_HORIZONTAL and not _params.w then
 				_params.w = math.max(_params.w or 0, box:measure(_direction, _params.padding or 0).w)
-			elseif _direction == cc.SCROLLVIEW_DIRECTION_VERTICAL and not _params.h then
+			elseif _direction == cc.ui.UIScrollView.DIRECTION_VERTICAL and not _params.h then
 				_params.h = math.max(_params.h or 0, box:measure(_direction, _params.padding or 0).h)
 			end
 			box:layout(_direction, _params)
@@ -116,17 +116,17 @@ end
 function BoxLayout:measure(_direction, _padding)
 	local w,h = 0,0
 	for i,v in ipairs(self.item) do
-		if _direction == cc.SCROLLVIEW_DIRECTION_VERTICAL then
+		if _direction == cc.ui.UIScrollView.DIRECTION_VERTICAL then
 			w = math.max(w, v.item:getContentSize().width+v.params.l+v.params.r) 
 			h = h + v.item:getContentSize().height+v.params.t+v.params.b
-		elseif _direction == cc.SCROLLVIEW_DIRECTION_HORIZONTAL then
+		elseif _direction == cc.ui.UIScrollView.DIRECTION_HORIZONTAL then
 			h = math.max(h, v.item:getContentSize().height+v.params.t+v.params.b) 
 			w = w + v.item:getContentSize().width+v.params.l+v.params.r
 		end
 	end
-	if _direction == cc.SCROLLVIEW_DIRECTION_VERTICAL then
+	if _direction == cc.ui.UIScrollView.DIRECTION_VERTICAL then
 		h = h + (#(self.item) - 1) * _padding
-	elseif _direction == cc.SCROLLVIEW_DIRECTION_HORIZONTAL then
+	elseif _direction == cc.ui.UIScrollView.DIRECTION_HORIZONTAL then
 		w = w + (#(self.item) - 1) * _padding
 	end
 
@@ -158,9 +158,9 @@ function BoxLayout:layout(_direction, _params)
 	    self.bg:setContentSize(cc.size(_params.w, _params.h))
     end
 
-    if _direction == cc.SCROLLVIEW_DIRECTION_HORIZONTAL then
+    if _direction == cc.ui.UIScrollView.DIRECTION_HORIZONTAL then
     	self:hlayout(_params, src_size.w, display.ANCHOR_POINTS[_params.align])
-	elseif _direction == cc.SCROLLVIEW_DIRECTION_VERTICAL then
+	elseif _direction == cc.ui.UIScrollView.DIRECTION_VERTICAL then
     	self:vlayout(_params, src_size.h, display.ANCHOR_POINTS[_params.align])
     end
 end

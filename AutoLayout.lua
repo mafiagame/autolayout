@@ -58,7 +58,7 @@ function AutoLayout:setViewSize(_size)
 end
 
 function AutoLayout:gotoBegin(_ani)
-	if self:getDirection() == cc.SCROLLVIEW_DIRECTION_VERTICAL then
+	if self:getDirection() == cc.ui.UIScrollView.DIRECTION_VERTICAL then
 		self:setContentOffset(-self.box:getContentSize().height+self:getViewSize().height, _ani)
 	else
 		self:setContentOffset(0, _ani)
@@ -66,7 +66,7 @@ function AutoLayout:gotoBegin(_ani)
 end
 
 function AutoLayout:gotoEnd(_ani)
-	if self:getDirection() == cc.SCROLLVIEW_DIRECTION_VERTICAL then
+	if self:getDirection() == cc.ui.UIScrollView.DIRECTION_VERTICAL then
 		self:setContentOffset(math.max(0, self:getViewSize().height -self.box:getContentSize().height ), _ani)
 	else
 		self:setContentOffset(-self.box:getContentSize().width+self:getViewSize().width, _ani)
@@ -74,7 +74,7 @@ function AutoLayout:gotoEnd(_ani)
 end
 
 function AutoLayout:setContentOffset(offset, animated)
-	if self:getDirection() == cc.SCROLLVIEW_DIRECTION_VERTICAL then
+	if self:getDirection() == cc.ui.UIScrollView.DIRECTION_VERTICAL then
 		self.scrollNode:setPositionY(offset)
 	else
 		self.scrollNode:setPositionX(offset)
@@ -86,7 +86,7 @@ function AutoLayout:pushGrid(_item_list, _stripe, _direction, _params, _padding)
 end
 
 function AutoLayout:isNeedScroll()
-	if self:getDirection() == cc.SCROLLVIEW_DIRECTION_VERTICAL then
+	if self:getDirection() == cc.ui.UIScrollView.DIRECTION_VERTICAL then
 		return self.box:getContentSize().height>self:getViewSize().height
 	else
 		return self.box:getContentSize().width>self:getViewSize().width
@@ -105,7 +105,7 @@ function AutoLayout:layout(_movetoend, _ani)
 	-- 计算偏移,重新布局
 	local length = 0
 	local offset = 0
-	if self:getDirection() == cc.SCROLLVIEW_DIRECTION_VERTICAL then
+	if self:getDirection() == cc.ui.UIScrollView.DIRECTION_VERTICAL then
 		length = self.box:getContentSize().height
 		offset = self.box:getPositionY()
 		self.box:layout(self:getDirection(), {w=self:getViewSize().width})
@@ -125,7 +125,7 @@ function AutoLayout:layout(_movetoend, _ani)
 		if not self.layouted then
 			self:gotoBegin(_ani)
 		else
-			if self:getDirection() == cc.SCROLLVIEW_DIRECTION_VERTICAL then
+			if self:getDirection() == cc.ui.UIScrollView.DIRECTION_VERTICAL then
 				self:setContentOffset(-(self.box:getContentSize().height-length)+offset, _ani)
 			else
 				self:setContentOffset(-(self.box:getContentSize().width-length)+offset, _ani)
