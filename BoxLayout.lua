@@ -43,7 +43,7 @@ function BoxLayout:insert(_item, _index, _params)
 	end
 	self:addChild(_item)
 
-	return _item
+	return item
 end
 
 function BoxLayout:removeByTag(_tag, _all)
@@ -177,6 +177,7 @@ function BoxLayout:hlayout(_params, _w, _anchor)
 	local y = 0
 	local size = nil
 	for i,v in ipairs(self.item) do
+		v.id = i
 		size = self:getItemSize(v.item)
 		y = _anchor.y * _params.h + (1 - v.item:getAnchorPoint().y - _anchor.y) * size.height
 		x = x + v.params.l + size.width/2
@@ -190,6 +191,7 @@ function BoxLayout:vlayout(_params, _h, _anchor)
 	local y = _h - (_anchor.y * (_params.h - _h))
 	local size = nil
 	for i,v in ipairs(self.item) do
+		v.id = i
 		size = self:getItemSize(v.item)
 		x = _anchor.x * _params.w + (1 - v.item:getAnchorPoint().x - _anchor.x) * size.width
 		y = y - (v.params.t + size.height/2)
