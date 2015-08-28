@@ -68,7 +68,18 @@ function DropRefreshLayout:enable(_node, _callfunc)
 	self.dropNode:setVisible(false)
 
 	self.isEnableLoadMore = true
-	self.loadMoreCallfunc = _callfunc
+	self.loadMoreCallfunc = function(_action)
+    	if _action == "begin" then
+    		self.dropNode:dropBegin()
+    	elseif _action == "over" then
+    		self.dropNode:dropOver()
+    	elseif _action == "reset" then
+    		self.dropNode:reset()
+    	elseif _action == "end" then
+    		self.dropNode:dropEnd()
+		    _callfunc()
+    	end
+    end
 end
 
 function DropRefreshLayout:layout(_movetoend, _ani)
