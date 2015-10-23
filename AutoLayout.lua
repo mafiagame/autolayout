@@ -5,8 +5,9 @@
 
 
 local BoxLayout = import(".BoxLayout")
+local MMScrollView = import(".MMScrollView")
 
-local AutoLayout = class("AutoLayout", cc.ui.UIScrollView)
+local AutoLayout = class("AutoLayout", MMScrollView)
 
 function AutoLayout:ctor()
 	AutoLayout.super.ctor(self)
