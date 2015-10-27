@@ -113,6 +113,20 @@ function BoxLayout:getItem(_id)
 	return assert(self.item[_id])
 end
 
+function BoxLayout:getItemByTag(_tag, _all)
+	local items = {}
+	for i,v in ipairs(self.item) do
+		if v.params.tag and v.params.tag == _tag then
+			if _all then
+				table.insert(items, v)
+			else
+				return v
+			end
+		end
+	end
+	return items
+end
+
 function BoxLayout:getItemSize(_item)
 	local box = _item:getBoundingBox()
 	return cc.size(box.width, box.height)
