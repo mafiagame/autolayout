@@ -124,7 +124,9 @@ function BoxLayout:getItemByTag(_tag, _all)
 			end
 		end
 	end
-	return items
+	if _all then
+		return items
+	end
 end
 
 function BoxLayout:getItemSize(_item)
