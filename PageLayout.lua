@@ -87,6 +87,10 @@ function PageLayout:onMoveDone()
 	end
 end
 
+function PageLayout:currentPageIndex()
+	return self.current
+end
+
 function PageLayout:layout(_index)
 	_index = _index or 1
 	DropRefreshLayout.super.layout(self)
