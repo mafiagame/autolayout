@@ -449,14 +449,6 @@ end
 
 function MMScrollView:onTouch_(event)
 
-    if self.swallow and self.priority > MMScrollView.swallow_priority then
-        MMScrollView.swallow = true
-        MMScrollView.swallow_priority = self.priority
-    end
-    if MMScrollView.swallow and self.priority < MMScrollView.swallow_priority then
-        return
-    end
-
     if "began" == event.name and not self:isTouchInViewRect(event) then
         printInfo("MMScrollView - touch didn't in viewRect")
         return false
@@ -467,6 +459,15 @@ function MMScrollView:onTouch_(event)
         if not cc.rectContainsPoint(cascadeBound, cc.p(event.x, event.y)) then
             return false
         end
+    end
+
+    if self.swallow and self.priority > MMScrollView.swallow_priority then
+        MMScrollView.swallow = true
+        MMScrollView.swallow_priority = self.priority
+    end
+    
+    if MMScrollView.swallow and self.priority < MMScrollView.swallow_priority then
+        return
     end
 
     if "began" == event.name then
@@ -519,6 +520,10 @@ function MMScrollView:onTouch_(event)
         else
             self:callListener_{name = "clicked", x = event.x, y = event.y}
         end
+
+    elseif "cancelled" == event.name then
+        MMScrollView.swallow = false
+        MMScrollView.swallow_priority = 1
     end
 end
 
