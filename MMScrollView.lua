@@ -42,6 +42,10 @@ MMScrollView.TOUCH_ZORDER           = -99
 MMScrollView.DIRECTION_HORIZONTAL   = 0
 MMScrollView.DIRECTION_VERTICAL     = 1
 MMScrollView.DIRECTION_BOTH         = 2
+MMScrollView.tag = 1
+MMScrollView.priority = 1
+MMScrollView.swallow = false
+MMScrollView.swallow_priority = 1
 
 -- start --
 
@@ -77,6 +81,9 @@ function MMScrollView:ctor(params)
     self.layoutPadding = {left = 0, right = 0, top = 0, bottom = 0}
     self.speed = {x = 0, y = 0}
 
+    self.tag = MMScrollView.tag
+    self.priority = MMScrollView.priority
+    self.swallow = false
     if not params then
         return
     end
@@ -342,7 +349,6 @@ function MMScrollView:setTouchEnabled(bEnabled)
         return
     end
     self.scrollNode:setTouchEnabled(bEnabled)
-
     return self
 end
 
@@ -364,14 +370,23 @@ function MMScrollView:addScrollNode(node)
         self.viewRect_ = self:getBox()
         self:setViewRect(self.viewRect_)
     end
-    node:setTouchSwallowEnabled(false)
-    node:setTouchEnabled(true)
+    --node:setSwallowTouches(true)
+
     -- node:addNodeEventListener(cc.NODE_TOUCH_EVENT, function (event)
  --        return self:onTouch_(event)
  --    end)
-    node:addNodeEventListener(cc.NODE_TOUCH_CAPTURE_EVENT, function (event)
+    self.scrollNode:addNodeEventListener(cc.NODE_TOUCH_CAPTURE_EVENT, function (event)
         return self:onTouch_(event)
-    end)
+    end,MMScrollView.tag,MMScrollView.priority)
+    MMScrollView.tag = MMScrollView.tag+1
+    MMScrollView.priority = MMScrollView.priority+1
+
+    self.tag = MMScrollView.tag
+    self.priority = MMScrollView.priority
+    self.swallow = MMScrollView.swallow
+
+    self.scrollNode:setTouchEnabled(true)
+    self.scrollNode:setTouchSwallowEnabled(false)
     -- self:addTouchNode()
 
     return self
@@ -433,6 +448,15 @@ function MMScrollView:onTouchCapture_(event)
 end
 
 function MMScrollView:onTouch_(event)
+
+    if self.swallow and self.priority > MMScrollView.swallow_priority then
+        MMScrollView.swallow = true
+        MMScrollView.swallow_priority = self.priority
+    end
+    if MMScrollView.swallow and self.priority < MMScrollView.swallow_priority then
+        return
+    end
+
     if "began" == event.name and not self:isTouchInViewRect(event) then
         printInfo("MMScrollView - touch didn't in viewRect")
         return false
@@ -481,6 +505,10 @@ function MMScrollView:onTouch_(event)
         self:scrollBy(self.speed.x, self.speed.y)
         self:callListener_{name = "moved", x = event.x, y = event.y}
     elseif "ended" == event.name then
+
+        MMScrollView.swallow = false
+        MMScrollView.swallow_priority = 1
+
         if self.bDrag_ then
             self.bDrag_ = false
             self:scrollAuto()
