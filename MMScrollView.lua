@@ -33,7 +33,7 @@ quick 滚动控件
 ]]
 
 local MMScrollView = class("MMScrollView", function()
-    return cc.ClippingRegionNode:create()
+    return cc.ClippingNode:create()
 end)
 
 MMScrollView.BG_ZORDER              = -100
@@ -161,7 +161,17 @@ function MMScrollView:addBgIf(params)
 end
 
 function MMScrollView:setViewRect(rect)
-    self:setClippingRegion(rect)
+
+    self:setAlphaThreshold(1)
+    self:setAnchorPoint(cc.p(0.5,0.5))
+    self:setInverted(false)
+    self:setAlphaThreshold(0.05);
+    
+    local layercolor = cc.LayerColor:create(cc.c4b(0,0,0,255))
+    layercolor:setContentSize(rect)
+
+    self:setStencil(layercolor)
+    
     self.viewRect_ = rect
     self.viewRectIsNodeSpace = false
 
