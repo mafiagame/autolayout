@@ -169,8 +169,11 @@ function MMScrollView:setViewRect(rect)
     
     local layercolor = cc.LayerColor:create(cc.c4b(0,0,0,255))
     layercolor:setContentSize(rect)
-
-    self:setStencil(layercolor)
+    if self:getStencil() then
+        self:getStencil():setContentSize(cc.size(rect.width, rect.height))
+    else
+        self:setStencil(layercolor)
+    end
     
     self.viewRect_ = rect
     self.viewRectIsNodeSpace = false
