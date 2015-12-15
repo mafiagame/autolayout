@@ -84,6 +84,7 @@ function MMScrollView:ctor(params)
     self.tag = MMScrollView.tag
     self.priority = MMScrollView.priority
     self.swallow = false
+    self.is_roll = true
     if not params then
         return
     end
@@ -158,6 +159,10 @@ function MMScrollView:addBgIf(params)
             params.viewRect.y + params.viewRect.height/2)
         :addTo(self, MMScrollView.BG_ZORDER)
         :setTouchEnabled(false)
+end
+
+function MMScrollView:setRoll(roll )
+    self.is_roll = roll
 end
 
 function MMScrollView:setViewRect(rect)
@@ -462,6 +467,9 @@ end
 
 function MMScrollView:onTouch_(event)
 
+    if not self.is_roll then
+        return true
+    end
     if "began" == event.name and not self:isTouchInViewRect(event) then
         printInfo("MMScrollView - touch didn't in viewRect")
         return false
