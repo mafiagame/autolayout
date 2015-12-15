@@ -170,13 +170,17 @@ function MMScrollView:setViewRect(rect)
     self:setAlphaThreshold(1)
     self:setAnchorPoint(cc.p(0.5,0.5))
     self:setInverted(false)
-    self:setAlphaThreshold(0.05);
+    -- self:setAlphaThreshold(0.05);
     
-    local layercolor = cc.LayerColor:create(cc.c4b(0,0,0,255))
-    layercolor:setContentSize(rect)
     if self:getStencil() then
-        self:getStencil():setContentSize(cc.size(rect.width, rect.height))
+        self:getStencil():setScaleX(rect.width/50)
+        self:getStencil():setScaleY(rect.height/50)
     else
+        local layercolor = display.newSprite("transparent.png")
+        layercolor:setAnchorPoint(cc.p(0,0))
+        layercolor:setScaleX(rect.width/50)
+        layercolor:setScaleY(rect.height/50)
+        layercolor:setPosition(0, 0)
         self:setStencil(layercolor)
     end
     
