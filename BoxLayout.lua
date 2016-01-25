@@ -94,9 +94,9 @@ function BoxLayout:pushGrid(_item_list, _stripe, _direction, _params, _padding)
 		box:push(v, _padding)
 		if i%_stripe == 0 or i == len then
 			if _direction == cc.ui.UIScrollView.DIRECTION_HORIZONTAL and not _params.w then
-				_params.w = math.max(_params.w or 0, box:measure(_direction, _params.padding or 0).w)
+				_params.w = math.max(_params.w or v:getContentSize().width*_stripe, box:measure(_direction, _params.padding or 0).w)
 			elseif _direction == cc.ui.UIScrollView.DIRECTION_VERTICAL and not _params.h then
-				_params.h = math.max(_params.h or 0, box:measure(_direction, _params.padding or 0).h)
+				_params.h = math.max(_params.h or v:getContentSize().height*_stripe, box:measure(_direction, _params.padding or 0).h)
 			end
 			box:layout(_direction, _params)
 			self:push(box)
@@ -156,10 +156,17 @@ function BoxLayout:measure(_direction, _padding)
 	return {w=w,h=h}
 end
 
+function BoxLayout:relayout()
+	self:layout(self.direction, self.params)
+end
+
 function BoxLayout:layout(_direction, _params)
 	_params = _params or {}
 	_params.padding = _params.padding or 0
 	_params.align   = _params.align or display.CENTER
+
+	self.direction = _direction
+	self.params = _params
 	
 	local src_size = self:measure(_direction, _params.padding)
 
@@ -195,10 +202,10 @@ function BoxLayout:hlayout(_params, _w, _anchor)
 	for i,v in ipairs(self.item) do
 		v.id = i
 		size = self:getItemSize(v.item)
-		y = _anchor.y * _params.h + (1 - v.item:getAnchorPoint().y - _anchor.y) * size.height
-		x = x + v.params.l + size.width/2
+		y = _anchor.y * _params.h + (v.item:getAnchorPoint().y - _anchor.y) * size.height
+		x = x + v.params.l + size.width * v.item:getAnchorPoint().x
 		v.item:setPosition(x,y)
-		x = x + size.width/2 + v.params.r + _params.padding
+		x = x + size.width * (1-v.item:getAnchorPoint().x) + v.params.r + _params.padding
 	end
 end
 
@@ -210,9 +217,9 @@ function BoxLayout:vlayout(_params, _h, _anchor)
 		v.id = i
 		size = self:getItemSize(v.item)
 		x = _anchor.x * _params.w + (1 - v.item:getAnchorPoint().x - _anchor.x) * size.width
-		y = y - (v.params.t + size.height/2)
+		y = y - (v.params.t + size.height * (1-v.item:getAnchorPoint().y))
 		v.item:setPosition(x,y)
-		y = y - (size.height/2 + v.params.b + _params.padding)
+		y = y - (size.height * v.item:getAnchorPoint().y + v.params.b + _params.padding)
 	end
 end
 
