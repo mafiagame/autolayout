@@ -113,6 +113,10 @@ function BoxLayout:getItem(_id)
 	return assert(self.item[_id])
 end
 
+function BoxLayout:getItems()
+	return self.item
+end
+
 function BoxLayout:getItemByTag(_tag, _all)
 	local items = {}
 	for i,v in ipairs(self.item) do
