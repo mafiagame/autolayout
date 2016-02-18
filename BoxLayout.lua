@@ -23,6 +23,7 @@ end
 
 function BoxLayout:clear()
 	self.item = {}
+	self.is_prelaod_mode = false
 	self:removeAllChildren()
 end
 

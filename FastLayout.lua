@@ -16,6 +16,7 @@ function FastLayout:ctor()
 	self.pop         = self.warning
 	self.removeByTag = self.warning
 	self.remove      = self.warning
+	self.clear       = self.warning
 
     self:scheduleUpdate()
     self:addNodeEventListener(cc.NODE_ENTER_FRAME_EVENT, handler(self, self.onScrollEvent))
@@ -49,11 +50,13 @@ function FastLayout:reload(_capacity, _params, _creater)
 	assert(_capacity > 0 , "Capacity must large than 0 !")
 	assert(_params.size , "Property [size] must in params !")
 
+	self.box:clear()
+
 	self.capacity = _capacity
 	self.creater = _creater
 	self.item_size = _params.size
 	self.max_offset = 0
-	self.loaded_index = math.ceil(self:getViewSize().height/_params.size.height)
+	self.loaded_index = math.min(_capacity, math.ceil(self:getViewSize().height/_params.size.height))
 
 	for i = 1, self.loaded_index do
 		self.box:push(self.creater(i))
@@ -63,6 +66,7 @@ function FastLayout:reload(_capacity, _params, _creater)
 		self.box:preload(_capacity - self.loaded_index, _params)
 	end
 
+	self:layout(false)
 end
 
 function FastLayout:onScrollEvent(event)
