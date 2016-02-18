@@ -113,6 +113,19 @@ function BoxLayout:getItem(_id)
 	return assert(self.item[_id])
 end
 
+function BoxLayout:sortItem()
+	local wight_cache = {}
+	local function get_weight(_item)
+		if not wight_cache[_item] then
+			wight_cache[_item] = _item:onAutoLayoutGetSortWeight()
+		end
+		return wight_cache[_item]
+	end
+	table.sort( self.item, function(v1,v2)
+		return get_weight(v1.item) > get_weight(v2.item)
+	end )
+end
+
 function BoxLayout:getItems()
 	return self.item
 end
