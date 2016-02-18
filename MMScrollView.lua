@@ -76,6 +76,7 @@ MMScrollView.swallow_priority = 1
 
 function MMScrollView:ctor(params)
     self.bBounce = true
+    self.bAccelerate = true
     self.nShakeVal = 5
     self.direction = MMScrollView.DIRECTION_BOTH
     self.layoutPadding = {left = 0, right = 0, top = 0, bottom = 0}
@@ -273,6 +274,12 @@ end
 
 function MMScrollView:setBounceable(bBounceable)
     self.bBounce = bBounceable
+
+    return self
+end
+
+function MMScrollView:setAccelerateable(bAccelerateable)
+    self.bAccelerate = bAccelerateable
 
     return self
 end
@@ -537,6 +544,11 @@ function MMScrollView:onTouch_(event)
 
         if self.bDrag_ then
             self.bDrag_ = false
+
+            if not self.bAccelerate then
+                self.speed = cc.p(0,0)
+            end
+
             self:scrollAuto()
 
             self:callListener_{name = "ended", x = event.x, y = event.y}
