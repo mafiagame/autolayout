@@ -82,6 +82,10 @@ function AutoLayout:setContentOffset(offset, animated)
 	end	
 end
 
+function AutoLayout:getContentOffset()
+	return cc.p(self.scrollNode:getPosition())
+end
+
 function AutoLayout:pushGrid(_item_list, _stripe, _direction, _params, _padding)
 	return self.box:pushGrid(_item_list, _stripe, _direction, _params, _padding)
 end

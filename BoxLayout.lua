@@ -26,24 +26,50 @@ function BoxLayout:clear()
 	self:removeAllChildren()
 end
 
-function BoxLayout:insert(_item, _index, _params)
+function BoxLayout:preload(_count, _params)
+	assert(_params and _params.size)
+	_params.anchor = _params.anchor or cc.p(0.5, 0.5)
+	for i=1, _count do
+		self:insert(nil, nil, _params)
+	end
+	self.is_prelaod_mode = true
+end
+
+function BoxLayout:insert(_node, _index, _params)
 	_params = _params or {}
 	_params.l= _params.l or 0
 	_params.r= _params.r or 0
 	_params.t= _params.t or 0
 	_params.b= _params.b or 0
 
-	_item:setAnchorPoint(cc.p(0.5, 0.5))
-
-	local item = {item=_item, params = _params}
-	if _index then
-		table.insert(self.item, _index, item)
+	local item_new = nil
+	if self.is_prelaod_mode then
+		for i,v in ipairs(self.item) do
+			if not v.item then
+				item_new = v
+				break
+			end
+		end
+		if not item_new then
+			return
+		end
+		item_new.item = assert(_node)
+		item_new.params = _params
 	else
-		table.insert(self.item, item)
+		item_new = {item=_node, params = _params}
+		if _index then
+			table.insert(self.item, _index, item_new)
+		else
+			table.insert(self.item, item_new)
+		end
 	end
-	self:addChild(_item)
 
-	return item
+	if _node then
+		_node:setAnchorPoint(cc.p(0.5, 0.5))
+		self:addChild(_node)
+	end
+
+	return item_new
 end
 
 function BoxLayout:removeByTag(_tag, _all)
@@ -115,14 +141,24 @@ end
 
 function BoxLayout:sortItem()
 	local wight_cache = {}
-	local function get_weight(_item)
-		if not wight_cache[_item] then
-			wight_cache[_item] = _item:onAutoLayoutGetSortWeight()
+	local min_index = - 99999
+	local function get_weight(_item, _id)
+		if not wight_cache[_id] then
+			if _item then
+				wight_cache[_id] = _item:onAutoLayoutGetSortWeight()
+			else
+				wight_cache[_id] = min_index
+				min_index = min_index - 1
+			end
 		end
-		return wight_cache[_item]
+		return wight_cache[_id]
+	end
+
+	for i,v in ipairs(self.item) do
+		v.__sort_id = i
 	end
 	table.sort( self.item, function(v1,v2)
-		return get_weight(v1.item) > get_weight(v2.item)
+		return get_weight(v1.item, v1.__sort_id) > get_weight(v2.item, v2.__sort_id)
 	end )
 end
 
@@ -146,16 +182,27 @@ function BoxLayout:getItemByTag(_tag, _all)
 	end
 end
 
-function BoxLayout:getItemSize(_item)
-	local box = _item:getBoundingBox()
-	return cc.size(box.width, box.height)
+function BoxLayout:getItemSize(_id)
+	local params = assert(self.item[_id]).params
+	return cc.size(params.size.width + params.l +  params.r, params.size.height + params.t +  params.b) 
+end
+
+function BoxLayout:_calcItemSize(_item, _params)
+	if not _item then
+		return _params.size
+	end
+
+	_params.size = _item:getBoundingBox()
+	_params.anchor = _item:getAnchorPoint()
+
+	return _params.size
 end
 
 function BoxLayout:measure(_direction, _padding)
 	local w,h = 0,0
 	local size = nil
 	for i,v in ipairs(self.item) do
-		size = self:getItemSize(v.item)
+		size = self:_calcItemSize(v.item, v.params)
 		if _direction == cc.ui.UIScrollView.DIRECTION_VERTICAL then
 			w = math.max(w, size.width+v.params.l+v.params.r) 
 			h = h + size.height+v.params.t+v.params.b
@@ -215,28 +262,30 @@ end
 function BoxLayout:hlayout(_params, _w, _anchor)
 	local x = _anchor.x*(_params.w - _w)
 	local y = 0
-	local size = nil
+	local size, anchor
 	for i,v in ipairs(self.item) do
 		v.id = i
-		size = self:getItemSize(v.item)
-		y = _anchor.y * _params.h + (v.item:getAnchorPoint().y - _anchor.y) * size.height
-		x = x + v.params.l + size.width * v.item:getAnchorPoint().x
-		v.item:setPosition(x,y)
-		x = x + size.width * (1-v.item:getAnchorPoint().x) + v.params.r + _params.padding
+		size = v.params.size
+		anchor = v.params.anchor
+		y = _anchor.y * _params.h + (anchor.y - _anchor.y) * size.height
+		x = x + v.params.l + size.width * anchor.x
+		if v.item then v.item:setPosition(x,y) end
+		x = x + size.width * (1-anchor.x) + v.params.r + _params.padding
 	end
 end
 
 function BoxLayout:vlayout(_params, _h, _anchor)
 	local x = 0
 	local y = _h - (_anchor.y * (_params.h - _h))
-	local size = nil
+	local size, anchor
 	for i,v in ipairs(self.item) do
 		v.id = i
-		size = self:getItemSize(v.item)
-		x = _anchor.x * _params.w + (1 - v.item:getAnchorPoint().x - _anchor.x) * size.width
-		y = y - (v.params.t + size.height * (1-v.item:getAnchorPoint().y))
-		v.item:setPosition(x,y)
-		y = y - (size.height * v.item:getAnchorPoint().y + v.params.b + _params.padding)
+		size = v.params.size
+		anchor = v.params.anchor
+		x = _anchor.x * _params.w + (1 - anchor.x - _anchor.x) * size.width
+		y = y - (v.params.t + size.height * (1-anchor.y))
+		if v.item then v.item:setPosition(x,y) end
+		y = y - (size.height * anchor.y + v.params.b + _params.padding)
 	end
 end
 
