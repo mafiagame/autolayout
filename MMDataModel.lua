@@ -76,8 +76,13 @@ function MMDataModel:setField(_key, _value)
 end
 
 function MMDataModel:setFieldByFilter(_key, _value, _callfunc)
+	local re = nil
 	for i,v in ipairs(self.data) do
-		if _callfunc(i,v) then
+		re = _callfunc(i,v)
+		if type(re) == "nil" then
+			break
+		end
+		if re then
 			v.userdata[_key] = _value
 	    	self:dispatchEvent{ name  = "field_change", index = i, data = v, key = _key, value = _value, multi = true }
 	    end
