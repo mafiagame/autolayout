@@ -56,7 +56,13 @@ function MMTableView:tableCellAtIndex(table, idx)
     		:pos(self.class.designSize.width/2, self.class.designSize.height/2)
     		:addTo(cell)
     end
-    cell.view:refresh(self.modle:getData(idx + 1), self.modle)
+    
+    local view = cell.view
+    local data = self.modle:getData(idx + 1)
+    view:refresh(data, self.modle)
+    for k,v in pairs(data.userdata) do
+		view:onFieldChanged(k, v)
+    end
 
     return cell
 end
