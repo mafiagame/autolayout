@@ -374,12 +374,15 @@ end
 -- end --
 
 function MMScrollView:setTouchEnabled(bEnabled)
-    if not self.scrollNode then
-        return
-    end
-    self.scrollNode:setTouchEnabled(bEnabled)
+    -- if not self.scrollNode then
+    --     return
+    -- end
+    -- self.scrollNode:setTouchEnabled(bEnabled)
+    self.touch_enabled = bEnabled
+
     return self
 end
+
 
 -- start --
 
@@ -478,7 +481,7 @@ end
 
 function MMScrollView:onTouch_(event)
 
-    if not self.is_roll then
+    if not self.touch_enabled or not self.is_roll then
         return true
     end
     if "began" == event.name and not self:isTouchInViewRect(event) then
