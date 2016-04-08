@@ -167,6 +167,21 @@ function BoxLayout:getItems()
 	return self.item
 end
 
+function BoxLayout:getItemByOffset(_offset)
+	local offset = 0
+	for i,v in ipairs(self.item) do
+		if self.direction == cc.ui.UIScrollView.DIRECTION_VERTICAL then
+			offset = offset + v.params.size.height
+		elseif self.direction == cc.ui.UIScrollView.DIRECTION_HORIZONTAL then
+			offset = offset + v.params.size.width
+		end
+		if offset > _offset then
+			return i,v
+		end
+	end
+	return #self.item, self.item[#self.item]
+end
+
 function BoxLayout:getItemByTag(_tag, _all)
 	local items = {}
 	for i,v in ipairs(self.item) do
