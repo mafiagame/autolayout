@@ -16,6 +16,11 @@ function AutoLayout:ctor()
 	self:addScrollNode(self.box)
 end
 
+function AutoLayout:onTouch_(event)
+	self:stopMoveAanimation()
+	return AutoLayout.super.onTouch_(self, event)
+end
+
 function AutoLayout:setSizeSuitEnable(_enbale)
 	self.sizeSuitEnbale = _enbale
 	self:refreshSizeSuit()
@@ -74,12 +79,37 @@ function AutoLayout:gotoEnd(_ani)
 	end
 end
 
+function AutoLayout:stopMoveAanimation()
+	if self.move_animation then
+		self.scrollNode:stopAction(self.move_animation)
+		self.move_animation = nil
+	end
+end
+
 function AutoLayout:setContentOffset(offset, animated)
-	if self:getDirection() == cc.ui.UIScrollView.DIRECTION_VERTICAL then
-		self.scrollNode:setPositionY(offset)
+	if animated then
+		local time = 0.2
+		if type(animated) == "number" then
+			time = animated
+		end
+		self:stopMoveAanimation()
+		local pos = cc.p(offset, offset)
+		if self:getDirection() == cc.ui.UIScrollView.DIRECTION_VERTICAL then
+			pos.x = self.scrollNode:getPositionX()
+		else
+			pos.y = self.scrollNode:getPositionY()
+		end			
+		self.scrollNode:runAction(cc.Sequence:create({
+			cc.EaseSineOut:create(cc.MoveTo:create(time, pos)),
+			cc.CallFunc:create(handler(self, self.stopMoveAanimation)),
+		}))
 	else
-		self.scrollNode:setPositionX(offset)
-	end	
+		if self:getDirection() == cc.ui.UIScrollView.DIRECTION_VERTICAL then
+			self.scrollNode:setPositionY(offset)
+		else
+			self.scrollNode:setPositionX(offset)
+		end	
+	end
 end
 
 function AutoLayout:getContentOffset()
