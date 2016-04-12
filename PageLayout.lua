@@ -93,7 +93,7 @@ end
 
 function PageLayout:layout(_index)
 	_index = _index or 1
-	DropRefreshLayout.super.layout(self)
+	PageLayout.super.layout(self)
 	self:to(_index, false)
 end
 
