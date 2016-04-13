@@ -7,6 +7,8 @@ local BoxLayout = class("BoxLayout", function()
 	return cc.Node:create()
 end)
 
+BoxLayout.debug = false
+
 function BoxLayout:ctor()
 	self:setAnchorPoint(cc.p(0.5,0.5))
 	self.item = {}
@@ -23,45 +25,31 @@ end
 
 function BoxLayout:clear()
 	self.item = {}
-	self.is_prelaod_mode = false
 	self:removeAllChildren()
 end
 
 function BoxLayout:preload(_count, _params)
 	assert(_params and _params.size)
-	_params.anchor = _params.anchor or cc.p(0.5, 0.5)
 	for i=1, _count do
-		self:insert(nil, nil, _params)
+		self:insert(nil, nil, clone(_params))
 	end
-	self.is_prelaod_mode = true
 end
 
 function BoxLayout:insert(_node, _index, _params)
-	_params = _params or {}
-	_params.l= _params.l or 0
-	_params.r= _params.r or 0
-	_params.t= _params.t or 0
-	_params.b= _params.b or 0
+	_params        = _params        or {}
+	_params.l      = _params.l      or 0
+	_params.r      = _params.r      or 0
+	_params.t      = _params.t      or 0
+	_params.b      = _params.b      or 0
+	_params.anchor = _params.anchor or cc.p(0.5, 0.5)
 
-	local item_new = nil
-	if self.is_prelaod_mode then
-		for i,v in ipairs(self.item) do
-			if not v.item then
-				item_new = v
-				break
-			end
-		end
-		if not item_new then
-			return
-		end
-		item_new.item = assert(_node)
-		item_new.params = _params
-	else
-		item_new = {item=_node, params = _params}
-		if _index then
-			table.insert(self.item, _index, item_new)
-		else
-			table.insert(self.item, item_new)
+	-- preload mode
+	if not _node then
+		assert(_params.size)
+		if BoxLayout.debug then
+			_node = cc.LayerColor:create(cc.c4b(math.random(0,255),math.random(0,255),math.random(0,255),255))
+			_node:ignoreAnchorPointForPosition(false)
+			_node:setContentSize(_params.size)
 		end
 	end
 
@@ -70,7 +58,33 @@ function BoxLayout:insert(_node, _index, _params)
 		self:addChild(_node)
 	end
 
-	return item_new
+	local item = nil
+	item = {item=_node, params = _params}
+	if _index then
+		table.insert(self.item, _index, item)
+	else
+		table.insert(self.item, item)
+	end
+
+	return item
+end
+
+function BoxLayout:attach(_index, _node, _params)
+	local item = assert(self.item[_index])
+
+	if item.item then
+		item.item:removeFromParent()
+	end
+	item.item = _node
+	_node:setPosition(item.params.pos)
+	_node:setAnchorPoint(cc.p(0.5, 0.5))
+	self:addChild(_node)
+
+	if _params then
+		for k,v in pairs(_params) do
+			item.params[k] = v
+		end
+	end
 end
 
 function BoxLayout:removeByTag(_tag, _all)
@@ -285,6 +299,7 @@ function BoxLayout:hlayout(_params, _w, _anchor)
 		anchor = v.params.anchor
 		y = _anchor.y * _params.h + (anchor.y - _anchor.y) * size.height
 		x = x + v.params.l + size.width * anchor.x
+		v.params.pos = cc.p(x,y)
 		if v.item then v.item:setPosition(x,y) end
 		x = x + size.width * (1-anchor.x) + v.params.r + _params.padding
 	end
@@ -300,6 +315,7 @@ function BoxLayout:vlayout(_params, _h, _anchor)
 		anchor = v.params.anchor
 		x = _anchor.x * _params.w + (1 - anchor.x - _anchor.x) * size.width
 		y = y - (v.params.t + size.height * (1-anchor.y))
+		v.params.pos = cc.p(x,y)
 		if v.item then v.item:setPosition(x,y) end
 		y = y - (size.height * anchor.y + v.params.b + _params.padding)
 	end

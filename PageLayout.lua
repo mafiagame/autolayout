@@ -11,18 +11,20 @@ function PageLayout:ctor()
 
 	self.current = 1
 	self.is_move = false
+	self.is_page_init = {}
 end
 
 function PageLayout:next()
 	self:to(self.current + 1, true)
 end
 
-function PageLayout:setCallBack(_callfunc)
-	self.callfunc = _callfunc
-end
-
 function PageLayout:prev()
 	self:to(self.current - 1, true)
+end
+
+function PageLayout:setCallBack(_callfunc, _init_callfunc)
+	self.callfunc = _callfunc
+	self.init_callfunc = _init_callfunc
 end
 
 local tmpPos = 0
@@ -54,10 +56,18 @@ function PageLayout:to(_index, _ani)
 	if _index < 1 or _index > self:count() or self.is_move then
 		return false
 	end
+
+	if not self.is_page_init[_index] then
+		if self.init_callfunc then
+			self.init_callfunc(_index)
+		end
+		self.is_page_init[_index] = true
+	end
+
 	self.is_move = true
 	self.current = _index
 
-	local pos = cc.p(self.box:getItem(_index).item:getPosition())
+	local pos = cc.p(self.box:getItem(_index).params.pos)
 	if self:getDirection() == cc.ui.UIScrollView.DIRECTION_VERTICAL then
 		pos.x = 0
 		pos.y = -pos.y + self:getViewSize().width/2
@@ -65,15 +75,12 @@ function PageLayout:to(_index, _ani)
 		pos.y = 0
 		pos.x = -pos.x + self:getViewSize().width/2
 	end	
-
+	
 	if _ani then
-		transition.moveTo(self.scrollNode,
-			{
-				x = pos.x, y = pos.y, time = 0.3,
-				easing = "sineOut",
-				onComplete = handler(self, self.onMoveDone)
-			}
-		)
+		self.scrollNode:runAction(cc.Sequence:create({
+			cc.MoveTo:create(0.3, pos),
+			cc.CallFunc:create(handler(self, self.onMoveDone)),
+		}))
 	else
 		self.scrollNode:setPosition(pos)
 		self:onMoveDone()
