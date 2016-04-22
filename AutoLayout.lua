@@ -54,6 +54,10 @@ function AutoLayout:remove(_id)
 	self.box:remove(_id)
 end
 
+function AutoLayout:getContainer()
+	return self.box
+end
+
 function AutoLayout:getViewSize()
 	return self:getContentSize()
 end
