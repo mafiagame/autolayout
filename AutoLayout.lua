@@ -67,7 +67,15 @@ function AutoLayout:setViewSize(_size)
 	self:setContentSize(_size)
 end
 
-function AutoLayout:gotoBegin(_ani)
+function AutoLayout:moveToCenter(_ani)
+	if self:getDirection() == cc.ui.UIScrollView.DIRECTION_VERTICAL then
+    	self:setContentOffset(-self:getContainer():getContentSize().height/2 + self:getViewSize().height/2)
+	else
+    	self:setContentOffset(-self:getContainer():getContentSize().width/2 + self:getViewSize().width/2)
+	end	
+end
+
+function AutoLayout:moveToBegin(_ani)
 	if self:getDirection() == cc.ui.UIScrollView.DIRECTION_VERTICAL then
 		self:setContentOffset(-self.box:getContentSize().height+self:getViewSize().height, _ani)
 	else
@@ -75,7 +83,7 @@ function AutoLayout:gotoBegin(_ani)
 	end
 end
 
-function AutoLayout:gotoEnd(_ani)
+function AutoLayout:moveToEnd(_ani)
 	if self:getDirection() == cc.ui.UIScrollView.DIRECTION_VERTICAL then
 		self:setContentOffset(math.max(0, self:getViewSize().height -self.box:getContentSize().height ), _ani)
 	else
@@ -157,12 +165,12 @@ function AutoLayout:layout(_movetoend, _ani)
 
 	-- 调整位置
 	if _movetoend == true then
-		self:gotoEnd(_ani)
+		self:moveToEnd(_ani)
 	elseif _movetoend == false then
-		self:gotoBegin(_ani)
+		self:moveToBegin(_ani)
 	else
 		if not self.layouted then
-			self:gotoBegin(_ani)
+			self:moveToBegin(_ani)
 		else
 			if self:getDirection() == cc.ui.UIScrollView.DIRECTION_VERTICAL then
 				self:setContentOffset(-(self.box:getContentSize().height-length)+offset, _ani)

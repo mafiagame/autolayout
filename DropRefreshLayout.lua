@@ -59,7 +59,7 @@ function DropRefreshLayout:disable()
 	self.dropNode:release()
 	self.dropNode = nil
 	self.isLoading = false
-	self:gotoEnd()
+	self:moveToEnd()
 end
 
 function DropRefreshLayout:enable(_node, _callfunc)
